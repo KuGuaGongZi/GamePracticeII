@@ -1,8 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Grid : MonoBehaviour
+public class Grid
 {
+    public bool HasObj
+    {
+        get;
+        set;
+    }
     //方格的逻辑坐标
     public Vector2 Coord
     {
@@ -21,8 +26,16 @@ public class Grid : MonoBehaviour
         get;
         set;
     }
-    void OnMouseDown()
+    //方格的实际位置
+    public Vector3 Position
     {
-        Debug.Log("摁下");
-    } 
+        get;
+        set;
+    }
+    //方格携带的游戏物体
+    public GameObject Entity
+    {
+        get;
+        set;
+    }
 }

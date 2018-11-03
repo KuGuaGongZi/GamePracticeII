@@ -5,9 +5,7 @@ public class GameManager : MonoBehaviour
 {
     void Start()
     {
-    }
-    void Update()
-    {
-
+       GameDataManager.Instance.LoadData();
+       WindowFactory.instance.CreateWindow(WindowType.MainUI);
     }
 }

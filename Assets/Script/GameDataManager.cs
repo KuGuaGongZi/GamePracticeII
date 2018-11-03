@@ -12,7 +12,11 @@ public class GameDataManager : MonoBehaviour
         get;
         set;
     }
-    private GameData gameData = new GameData(); 
+    public GameData gameData
+    {
+        get;
+        set;
+    }
     private static GameDataManager instance;
     public static GameDataManager Instance
     {
@@ -24,12 +28,15 @@ public class GameDataManager : MonoBehaviour
     void Awake()
     {
         instance = this;
+        gameData = new GameData();
+
     }
     //初始化数据
     public void InitData()
     {
         gameData.Money = "0";
         gameData.Score = "0";
+        gameData.CoinType = CoinType.CFood1;
         //分配内存空间
         gameData.Level = new LevelData[3];
         for (int level = 0; level < gameData.Level.Length; level++)
@@ -49,21 +56,28 @@ public class GameDataManager : MonoBehaviour
         gameData.SaveMap = new CellType[Defines.RowCount * Defines.ColCount];
         gameData.SaveMap = gameData.Level[randLevel].Map;
         int arrIndex = 0;
-        //print(gameData.Level[randLevel].Map[3]);
         gridArr= new Grid[Defines.RowCount, Defines.ColCount];
         for (int rowIndex = 0; rowIndex < Defines.RowCount; rowIndex++)
         {
             for (int colIndex = 0; colIndex < Defines.ColCount; colIndex++)
             {
                 gridArr[rowIndex, colIndex] = new Grid();
-                //将地图中记录的单元格类型赋值存进二维数组里
+                //将定义好的初始化地图中记录的单元格类型赋值存进二维数组里
                 gridArr[rowIndex, colIndex].Type = gameData.Level[randLevel].Map[arrIndex];
                 gridArr[rowIndex, colIndex].Status = CellStatus.Full;
+                gridArr[rowIndex, colIndex].HasObj = false;
+                gridArr[rowIndex, colIndex].Entity = null;
+                if (gridArr[rowIndex, colIndex].Type == CellType.None)
+                {
+                    gridArr[rowIndex, colIndex].Status = CellStatus.None;
+                }
                 gridArr[rowIndex, colIndex].Coord = new Vector2(rowIndex,colIndex);
+                gridArr[rowIndex, colIndex].Position = Tool.Instance.IndexToPosition(gridArr[rowIndex, colIndex].Coord);
                 arrIndex++;
             }
 
         }
+        Tool.Instance.UpdateByMap();
         string json = JsonUtility.ToJson(gameData);
         CreateFile(Application.persistentDataPath, "GameData.json", json);
 
@@ -82,16 +96,10 @@ public class GameDataManager : MonoBehaviour
             gameData.Level[level] = new LevelData();
             gameData.Level[level].Map = new CellType[Defines.RowCount * Defines.ColCount];
         }
-        int index = 0;
-        foreach (KeyValuePair<string, CellType[]> item in MapData.Instance.mapList)
-        {
-            gameData.Level[index].Map = item.Value;
-            index++;
-        }
         //储备地图的内存分配
         gameData.SaveMap = new CellType[Defines.RowCount*Defines.ColCount];
         int arrIndex = 0;
-        //将目前的地图数据存进储备地图里
+        //将二维数组里的地图数据存进储备地图里
         for (int row= 0; row < Defines.RowCount; row++)
         {
             for (int col = 0; col < Defines.ColCount; col++)
@@ -141,13 +149,21 @@ public class GameDataManager : MonoBehaviour
                     for (int colIndex = 0; colIndex < Defines.ColCount; colIndex++)
                     {
                         gridArr[rowIndex, colIndex] = new Grid();
-                        //将地图中记录的单元格类型赋值存进二维数组里
+                        //将储备地图中记录的单元格类型赋值存进二维数组里
                         gridArr[rowIndex, colIndex].Type = gameData.SaveMap[arrIndex];
                         gridArr[rowIndex, colIndex].Status = CellStatus.Full;
+                        if (gridArr[rowIndex, colIndex].Type == CellType.None)
+                        {
+                            gridArr[rowIndex, colIndex].Status = CellStatus.None;
+                        }
                         gridArr[rowIndex, colIndex].Coord = new Vector2(rowIndex, colIndex);
+                        gridArr[rowIndex, colIndex].Position= Tool.Instance.IndexToPosition(gridArr[rowIndex, colIndex].Coord);
+                        gridArr[rowIndex, colIndex].HasObj = false;
+                        gridArr[rowIndex, colIndex].Entity = null;
                         arrIndex++;
                     }
                 }
+                Tool.Instance.UpdateByMap();
             }
         }
     }
