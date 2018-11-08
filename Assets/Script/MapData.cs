@@ -14,19 +14,19 @@ public class MapData : MonoBehaviour
         CellType.Food1,CellType.None, CellType.Food1,CellType.None, CellType.None, CellType.None,
     };
     private static CellType[] map2 ={
-        CellType.None, CellType.None, CellType.None, CellType.None, CellType.None, CellType.Food2,
+        CellType.None, CellType.None, CellType.None, CellType.Food2, CellType.None, CellType.Food2,
         CellType.None, CellType.None, CellType.None, CellType.None, CellType.None, CellType.None,
         CellType.None, CellType.None, CellType.None, CellType.None, CellType.Food1, CellType.None,
-        CellType.None, CellType.Food1,CellType.None, CellType.None, CellType.None, CellType.None,
-        CellType.None, CellType.None, CellType.None, CellType.None, CellType.None, CellType.None,
+        CellType.None, CellType.Food3,CellType.None, CellType.None, CellType.None, CellType.None,
+        CellType.Food1, CellType.None, CellType.None, CellType.None, CellType.None, CellType.None,
         CellType.Food1,CellType.None, CellType.Food1,CellType.None, CellType.None, CellType.None,
     };
     private static CellType[] map3 ={
         CellType.None, CellType.None, CellType.None, CellType.None, CellType.None, CellType.Food2,
-        CellType.None, CellType.None, CellType.None, CellType.None, CellType.None, CellType.None,
+        CellType.None, CellType.Food2, CellType.None, CellType.None, CellType.None, CellType.None,
         CellType.None, CellType.None, CellType.None, CellType.None, CellType.Food1, CellType.None,
-        CellType.None, CellType.Food1,CellType.None, CellType.None, CellType.None, CellType.None,
-        CellType.None, CellType.None, CellType.None, CellType.None, CellType.None, CellType.None,
+        CellType.None, CellType.None,CellType.None, CellType.None, CellType.None, CellType.None,
+        CellType.None, CellType.None, CellType.Food1, CellType.None, CellType.None, CellType.None,
         CellType.Food1,CellType.None, CellType.Food1,CellType.None, CellType.None, CellType.None,
     };
     public Dictionary<string, CellType[]> mapList = new Dictionary<string, CellType[]>()

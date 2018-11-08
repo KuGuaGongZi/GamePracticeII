@@ -8,6 +8,7 @@ public class GameData
     public string Money;
     public string Score;
     public CoinType CoinType;
+    public Sprite ChangeSprite;
     public CellType[] SaveMap;
     public LevelData[] Level;
 }

@@ -13,6 +13,7 @@ public enum CoinType
     CFood6,
     CCleaner1, 
     CCleaner2,
+    Bomb,
     None
 }
 //单元格元素类型
@@ -26,6 +27,8 @@ public enum CellType
     Food6,
     Cleaner1,
     Cleaner2,
+    Bomb,
+    Boom,
     Block,
     Soap,
     None
@@ -35,5 +38,19 @@ public enum CellStatus
 {
     Ready,
     Full,
+    None
+}
+//奖励时间物品类型
+public enum RewardType
+{
+    RewardFood1,
+    RewardFood2,
+    RewardFood3,
+    RewardFood4,
+    RewardFood5,
+    RewardFood6,
+    RewardCleaner1,
+    RewardCleaner2,
+    RewardBomb,
     None
 }

@@ -24,6 +24,5 @@ public class ShopItem : MonoBehaviour,IPointerDownHandler
     {
         WindowFactory.instance.CreateWindow(WindowType.ItemMessage);
         ItemMessage.instance.SetImg(transform.Find("Item").GetComponent<Image>().sprite);
-        //Debug.Log((CoinType)(int.Parse(itemName)-1));
     }
 }

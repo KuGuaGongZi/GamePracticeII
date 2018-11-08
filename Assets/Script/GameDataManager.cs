@@ -34,9 +34,11 @@ public class GameDataManager : MonoBehaviour
     //初始化数据
     public void InitData()
     {
+        DeleteFile(Application.persistentDataPath, "GameData.json");
         gameData.Money = "0";
         gameData.Score = "0";
         gameData.CoinType = CoinType.CFood1;
+        gameData.ChangeSprite = null;
         //分配内存空间
         gameData.Level = new LevelData[3];
         for (int level = 0; level < gameData.Level.Length; level++)
@@ -85,16 +87,26 @@ public class GameDataManager : MonoBehaviour
     //储存数据
     public void SaveData()
     {
-        //先删除文件
-        DeleteFile(Application.persistentDataPath, "GameData.json");
-        gameData.Money = "0";
-        gameData.Score = "0";
+        ////如果文件不存在，表明
+        //if (!File.Exists(Application.persistentDataPath + "//" + "GameData.json"))
+        //{
+        //    Debug.Log("文件不存在,开始初始化数据");
+        //    InitData();
+        //}
+        gameData.Money = MainUI.moneyText.text;
+        gameData.Score = MainUI.scoreText.text;
         //分配内存空间
         gameData.Level = new LevelData[3];
         for (int level = 0; level < gameData.Level.Length; level++)
         {
             gameData.Level[level] = new LevelData();
             gameData.Level[level].Map = new CellType[Defines.RowCount * Defines.ColCount];
+        }
+        int index = 0;
+        foreach (KeyValuePair<string, CellType[]> item in MapData.Instance.mapList)
+        {
+            gameData.Level[index].Map = item.Value;
+            index++;
         }
         //储备地图的内存分配
         gameData.SaveMap = new CellType[Defines.RowCount*Defines.ColCount];
@@ -105,16 +117,20 @@ public class GameDataManager : MonoBehaviour
             for (int col = 0; col < Defines.ColCount; col++)
             {
                 gameData.SaveMap[arrIndex] =gridArr[row,col].Type;
+                arrIndex++; 
             }
         }
         string json = JsonUtility.ToJson(gameData);
+        print("开始删除");
+        //先删除文件
+        DeleteFile(Application.persistentDataPath, "GameData.json");
+        print("删除成功");
         CreateFile(Application.persistentDataPath, "GameData.json", json);
     }
     //加载数据
     public void LoadData()
     {
         ReadData(Application.persistentDataPath, "GameData.json");
-
     }
     //读取数据
     public void ReadData(string path, string name)
@@ -165,6 +181,10 @@ public class GameDataManager : MonoBehaviour
                 }
                 Tool.Instance.UpdateByMap();
             }
+            //关闭流
+            sr.Close();
+            //销毁流
+            sr.Dispose();
         }
     }
     //删除文件

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using DG.Tweening;
 
 public class Tool : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class Tool : MonoBehaviour
     private GameObject CellBox;
     private GameObject CoinBox;
     public static GameObject readyCell;//存储准备状态的单元格
+    public static CoinType changeCoin=CoinType.None;
     public static Tool Instance
     {
         get
@@ -20,6 +22,7 @@ public class Tool : MonoBehaviour
             return _instance;
         }
     }
+    GameObject toolObj;
     void Awake()
     {
         _instance = this;
@@ -49,23 +52,33 @@ public class Tool : MonoBehaviour
     //获得随机的元素
     public CoinType GetRandCoinType()
     {
+        //CoinType CType = CoinType.Bomb;
         int randType = UnityEngine.Random.Range(0, 101);
+        print(randType);
         CoinType CType = CoinType.CFood1;
-        if (randType <= 60)
+        if (randType <= 40)
         {
             CType = CoinType.CFood1;
         }
-        if (randType <= 85 && randType > 60)
+        if (randType <= 60 && randType > 40)
         {
             CType = CoinType.CFood2;
         }
-        if (randType <= 95 && randType > 85)
+        if (randType <= 75 && randType > 60)
         {
             CType = CoinType.CFood3;
         }
-        if (randType > 95)
+        if (randType <= 85 && randType > 75)
+        {
+            CType = CoinType.CFood4;
+        }
+        if (randType <= 95 && randType > 85)
         {
             CType = CoinType.CCleaner1;
+        }
+        if (randType > 95)
+        {
+            CType = CoinType.Bomb;
         }
         return CType;
     }
@@ -120,14 +133,22 @@ public class Tool : MonoBehaviour
                     }
                     GameDataManager.Instance.gridArr[rowIndex, colIndex].Entity = obj;
                 }
-                ////处理状态为空却有携带实体的单元格
-                //if (GameDataManager.Instance.gridArr[rowIndex, colIndex].Status ==CellStatus.None && GameDataManager.Instance.gridArr[rowIndex, colIndex].HasObj)
-                //{
-                //    PoolManager.Instance.Delete(GameDataManager.Instance.gridArr[rowIndex, colIndex]);
-                //}
-
             }
         }
+    }
+    //放置特殊道具到场中
+    public void SetToolPos(Vector3 pos)
+    {
+        //GameDataManager.Instance.gridArr[rowIndex, colIndex].Status.ToString() + GameDataManager.Instance.gridArr[rowIndex, colIndex].Type.ToString()
+        CellType ct = (CellType)GameDataManager.Instance.gameData.CoinType;
+        if (!AddCell.hasTool)
+        {
+            toolObj = PoolManager.Instance.Get("Full" + ct.ToString()) as GameObject;
+        }
+        toolObj.transform.SetParent(CellBox.transform);
+        toolObj.transform.localPosition = pos;
+        toolObj.GetIsNullComponent<BoxCollider2D>();
+        toolObj.GetIsNullComponent<Bomb>();
     }
     //获得所有相同元素，超过2个返回一个元素坐标列表，没有返回null
     public List<Vector2> GetLinkCell(Grid gird)
@@ -226,12 +247,35 @@ public class Tool : MonoBehaviour
         }
         return linkList;
     }
+    public Dictionary<CellType, float> ScoreDic = new Dictionary<CellType, float>()
+    {
+        { CellType.Food1,10},
+        { CellType.Food2,20},
+        { CellType.Food3,40},
+        { CellType.Food4,80},
+        { CellType.Food5,100},
+        { CellType.Food6,150},
+        { CellType.Cleaner1,50},
+        { CellType.Cleaner2,70}
+    };
     //合成元素并消除旧元素
     public void BlendAndClearCell(int x, int y)
     {
         CoinType currentCoin = GameDataManager.Instance.gameData.CoinType;
         while (Tool.Instance.GetLinkCell(GameDataManager.Instance.gridArr[x, y]).Count >= 2)
         {
+            if (Tool.Instance.GetLinkCell(GameDataManager.Instance.gridArr[x, y]).Count>=3)
+            {
+                MainUI.instance.AddRewardSliderValue(0.2f);
+            }
+            float score;
+            if (ScoreDic.TryGetValue(GameDataManager.Instance.gridArr[(int)x, (int)y].Type, out score))
+            {
+                float scoreText = float.Parse(GameDataManager.Instance.gameData.Score);
+                scoreText += ((Tool.Instance.GetLinkCell(GameDataManager.Instance.gridArr[x, y]).Count + 1) * score);
+                GameDataManager.Instance.gameData.Score = scoreText.ToString();
+                MainUI.instance.SetScore();
+            }
             foreach (Vector2 t in Tool.Instance.GetLinkCell(GameDataManager.Instance.gridArr[x, y]))
             {
                 GameDataManager.Instance.gridArr[(int)t.x, (int)t.y].HasObj = false;
@@ -247,7 +291,78 @@ public class Tool : MonoBehaviour
             }
         }
     }
+    //合成最终元素后生成油渍障碍元素(3个)
+    public void CreateOils(Vector3 currentPos)
+    {
+        List<Grid> EmptyCellList = new List<Grid>();
+        for (int rowIndex = 0; rowIndex < Defines.RowCount; rowIndex++)
+        {
+            for (int colIndex = 0; colIndex < Defines.ColCount; colIndex++)
+            {
+                if (GameDataManager.Instance.gridArr[rowIndex, colIndex].Status == CellStatus.None)
+                {
+                    EmptyCellList.Add(GameDataManager.Instance.gridArr[rowIndex, colIndex]);
+                }
+            }
+        }
+        if (EmptyCellList.Count > 0)
+        {
+            int emptyCellNum = 3;
+            while (EmptyCellList.Count > 0 && emptyCellNum > 0)
+            {
+                int randEmptyCell = UnityEngine.Random.Range(0, EmptyCellList.Count);
+                GameObject oil = PoolManager.Instance.Get("FullBlock") as GameObject;
+                oil.transform.SetParent(CellBox.transform);
+                oil.transform.localPosition = currentPos;
+                oil.transform.DOLocalMove(EmptyCellList[randEmptyCell].Position, 0.7f);
+                int cellx = (int)EmptyCellList[randEmptyCell].Coord.x;
+                int celly = (int)EmptyCellList[randEmptyCell].Coord.y;
+                GameDataManager.Instance.gridArr[cellx,celly].Type=CellType.Block;
+                GameDataManager.Instance.gridArr[cellx, celly].Status =CellStatus.Full;
+                GameDataManager.Instance.gridArr[cellx, celly].Entity = oil;
+                GameDataManager.Instance.gridArr[cellx, celly].HasObj = true;
+                EmptyCellList.Remove(EmptyCellList[randEmptyCell]);
+                emptyCellNum--;
+            }
+        }
 
+    }
+    //使用柠檬喷雾清除随机一个油渍
+    public void ClearRandOil()
+    {
+        List<Grid> OilList = new List<Grid>();
+        for (int rowIndex = 0; rowIndex < Defines.RowCount; rowIndex++)
+        {
+            for (int colIndex = 0; colIndex < Defines.ColCount; colIndex++)
+            {
+                if (GameDataManager.Instance.gridArr[rowIndex, colIndex].Type == CellType.Block)
+                {
+                    OilList.Add(GameDataManager.Instance.gridArr[rowIndex, colIndex]);
+                }
+            }
+        }
+        if (OilList.Count>0)
+        {
+            int randOil = UnityEngine.Random.Range(0,OilList.Count);
+            GameObject soap = PoolManager.Instance.Get("FullSoap") as GameObject;
+            soap.transform.SetParent(CellBox.transform);
+            soap.transform.localPosition = OilList[randOil].Position;
+            int cellx = (int)OilList[randOil].Coord.x;
+            int celly = (int)OilList[randOil].Coord.y;
+            PoolManager.Instance.Delete(GameDataManager.Instance.gridArr[cellx, celly].Entity);
+            GameDataManager.Instance.gridArr[cellx, celly].Type = CellType.Soap;
+            GameDataManager.Instance.gridArr[cellx, celly].Status = CellStatus.Full;
+            GameDataManager.Instance.gridArr[cellx, celly].Entity = soap;
+            GameDataManager.Instance.gridArr[cellx, celly].HasObj = true;
+        }
+    }
+    //使用炸弹清除一个除油渍外的元素
+    public void UseBomb(Vector3 p)
+    {
+        GameObject boom = PoolManager.Instance.Get("FullBoom") as GameObject;
+        boom.transform.SetParent(CellBox.transform);
+        boom.transform.localPosition = p;
+    }
     //在相同元素单元格上生成相对于parent参数8方向提示箭头
     public void CreateArrows(Vector2 coord, Vector2 parent)
     {
@@ -357,8 +472,18 @@ public class Tool : MonoBehaviour
                 t.gameObject.SetActive(false);
             }
         }
-        CoinBox.transform.Find(Enum.GetName(typeof(CoinType), CType)).gameObject.SetActive(true);
-        GameDataManager.Instance.gameData.CoinType = CType;
+        if (changeCoin == CoinType.None)
+        {
+            CoinBox.transform.Find(Enum.GetName(typeof(CoinType), CType)).gameObject.SetActive(true);
+            GameDataManager.Instance.gameData.CoinType = CType;
+        }
+        else
+        {
+            print("Nochange");
+            CoinBox.transform.Find(Enum.GetName(typeof(CoinType), changeCoin)).gameObject.SetActive(true);
+            GameDataManager.Instance.gameData.CoinType = changeCoin;
+            changeCoin = CoinType.None;
+        }
     }
 
 }

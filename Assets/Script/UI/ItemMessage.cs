@@ -15,7 +15,7 @@ public class ItemMessage : SingletonWindow<ItemMessage>
     }
     public ItemMessage()
     {
-        m_sort_order = 2;
+        m_sort_order = 4;
     }
     protected override void Initialize()
     {
@@ -32,6 +32,20 @@ public class ItemMessage : SingletonWindow<ItemMessage>
     //点击购买按钮
     public void OnBuyBtn(GameObject obj, PointerEventData data)
     {
+        ShopData shopData = new ShopData();
+        foreach (var item in shopData.ShopDic)
+        {
+            if (item.Value.shopTexture.name==mSprite.name)
+            {
+                float currentMoney = float.Parse(GameDataManager.Instance.gameData.Money)- item.Value.price;
+                if (currentMoney<0)
+                {
+                    return;
+                }
+                GameDataManager.Instance.gameData.Money = currentMoney.ToString();
+                MainUI.instance.SetMoney();
+            }
+        }
         GameDataManager.Instance.gameData.CoinType = (CoinType)(int.Parse(mSprite.name) - 1);
         Tool.Instance.SetCoinByType((CoinType)(int.Parse(mSprite.name) - 1));
         Hide();

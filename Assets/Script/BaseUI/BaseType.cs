@@ -10,6 +10,16 @@ public enum WindowType
     None = 0,
     MainUI,
     ShopUI,
-    ItemMessage
+    ItemMessage,
+    AskSellUI,
+    AskWashUI,
+    MenuMainUI,
+    RoleUI,
+    TeachMainUI,
+    TeachShopUI,
+    TeachItemUI,
+    EndTeachUI,
+    TalkUI,
+    RewardUI
 }
             

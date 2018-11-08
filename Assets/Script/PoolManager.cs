@@ -10,7 +10,7 @@ public class PoolManager : MonoBehaviour
     {
         get
         {
-            if (instance==null)
+            if (instance == null)
             {
                 GameObject obj = new GameObject();
                 instance = obj.AddComponent<PoolManager>();
@@ -27,7 +27,7 @@ public class PoolManager : MonoBehaviour
     }
     public object Get(string objName)
     {
-        string folder ="";
+        string folder = "";
         if (objName.Substring(0, 5) == "Ready")
         {
             folder = "ReadyCell/";
@@ -36,13 +36,17 @@ public class PoolManager : MonoBehaviour
         {
             folder = "Arrow/";
         }
+        if (objName.Substring(0, 6) == "Reward")
+        {
+            folder = "RewardCell/";
+        }
         if (objName.Substring(0, 4) == "Full")
         {
             folder = "FullCell/";
         }
-        string name =objName + "(Clone)";
+        string name = objName + "(Clone)";
         object obj = null;
-        if (poolDic.ContainsKey(name)&&poolDic[name].Count>0)
+        if (poolDic.ContainsKey(name) && poolDic[name].Count > 0)
         {
             ArrayList list = poolDic[name];
             obj = list[0];
@@ -51,8 +55,7 @@ public class PoolManager : MonoBehaviour
         }
         else
         {
-            
-            obj = Instantiate(Resources.Load(folder+objName));
+            obj = Instantiate(Resources.Load(folder + objName));
         }
         return obj;
     }

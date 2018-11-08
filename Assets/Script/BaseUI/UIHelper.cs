@@ -35,6 +35,7 @@ public class UIHelper
 
         if (obj == null)
         {
+            Debug.Log("窗口为空");
             return null;
         }
         if (wnd == null)

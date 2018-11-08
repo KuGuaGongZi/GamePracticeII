@@ -17,7 +17,7 @@ public class ShopUI : SingletonWindow<ShopUI>
     }
     public ShopUI()
     {
-        m_sort_order = 1;
+        m_sort_order = 3;
     }
     protected override void Initialize()
     {

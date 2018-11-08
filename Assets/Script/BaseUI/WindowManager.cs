@@ -98,12 +98,10 @@ public class WindowManager : Singleton<WindowManager>
     {
         CloseAllWindows(false);
     }
-
     #region Tool Function
     private void CloseAllWindows(bool force)
     {
         m_closeing_all = true;
-
         for (int i = 0; i < m_wndList.Count; i++)
         {
             Window wnd = m_wndList[i];
@@ -117,6 +115,7 @@ public class WindowManager : Singleton<WindowManager>
                 wnd.Close();
             }
         }
+        m_wndList = new List<Window>();
     }
     private bool CheckInsertWindow(Window wnd)
     {
